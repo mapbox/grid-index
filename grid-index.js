@@ -4,14 +4,14 @@ module.exports = GridIndex;
 
 var NUM_PARAMS = 3;
 
-function GridIndex(n, extent, padding) {
+function GridIndex(extent, n, padding) {
     var cells = this.cells = [];
 
-    if (n instanceof ArrayBuffer) {
-        this.arrayBuffer = n;
+    if (extent instanceof ArrayBuffer) {
+        this.arrayBuffer = extent;
         var array = new Int32Array(this.arrayBuffer);
-        n = array[0];
-        extent = array[1];
+        extent = array[0];
+        n = array[1];
         padding = array[2];
 
         this.d = n + 2 * padding;
@@ -26,6 +26,9 @@ function GridIndex(n, extent, padding) {
         var bboxesOffset = array[NUM_PARAMS + cells.length + 1];
         this.keys = array.subarray(keysOffset, bboxesOffset);
         this.bboxes = array.subarray(bboxesOffset);
+
+        this.insert = this._insertReadonly;
+
     } else {
         this.d = n + 2 * padding;
         for (var i = 0; i < this.d * this.d; i++) {
@@ -54,6 +57,10 @@ GridIndex.prototype.insert = function(key, x1, y1, x2, y2) {
     this.bboxes.push(y1);
     this.bboxes.push(x2);
     this.bboxes.push(y2);
+};
+
+GridIndex.prototype._insertReadonly = function() {
+    throw 'Cannot insert into a GridIndex created from an ArrayBuffer.';
 };
 
 GridIndex.prototype._insertCell = function(x1, y1, x2, y2, cellIndex, uid) {
@@ -126,8 +133,8 @@ GridIndex.prototype.toArrayBuffer = function() {
     }
 
     var array = new Int32Array(metadataLength + totalCellLength + this.keys.length + this.bboxes.length);
-    array[0] = this.n;
-    array[1] = this.extent;
+    array[0] = this.extent;
+    array[1] = this.n;
     array[2] = this.padding;
 
     var offset = metadataLength;
