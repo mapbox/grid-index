@@ -71,7 +71,10 @@ GridIndex.prototype.query = function(x1, y1, x2, y2) {
     var min = this.min;
     var max = this.max;
     if (x1 <= min && y1 <= min && max <= x2 && max <= y2) {
-        return this.keys.slice();
+        // We use `Array#slice` because `this.keys` may be a `Int32Array` and
+        // some browsers (Safari and IE) do not support `TypedArray#slice`
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice#Browser_compatibility
+        return Array.prototype.slice.call(this.keys);
 
     } else {
         var result = [];
