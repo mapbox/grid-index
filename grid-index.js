@@ -71,7 +71,7 @@ GridIndex.prototype.query = function(x1, y1, x2, y2) {
     var min = this.min;
     var max = this.max;
     if (x1 <= min && y1 <= min && max <= x2 && max <= y2) {
-        return this.keys.slice();
+        return Array.prototype.slice.call(this.keys);
 
     } else {
         var result = [];
