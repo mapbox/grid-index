@@ -31,7 +31,7 @@ var keys = grid.query(0, 0, 100, 13);
 // `keys` is now [key1, key3]
 
 var arrayBuffer = grid.toArrayBuffer();
-// transfer the ArrayBuffer to a different worker 
+// transfer the ArrayBuffer to a different worker
 
 var grid2 = new GridIndex(arrayBuffer);
 var keys2 = grid2.query(0, 0, 100, 13);
@@ -54,25 +54,25 @@ Unserialize a GridIndex.
 - **arrayBuffer**: an ArrayBuffer produced by `gridIndex.toArrayBuffer()`.
 
 
-### `gridIndex.insert(key, x1, x2, y1, y2)`
+### `gridIndex.insert(key, x1, y1, x2, y2)`
 
 Insert a new key, box pair into the grid.
 
 - **key**: An unsigned 32bit integer.
 - **x1**: The x coordinate of the left edge of the box.
+- **y1**: The y coordinate of the bottom edge of the box.
 - **x2**: The x coordinate of the right edge of the box.
-- **y1**: The y coordinate of the top edge of the box.
-- **y2**: The y coordinate of the bottom edge of the box.
+- **y2**: The y coordinate of the top edge of the box.
 
 
-### `gridIndex.query(key, x1, x2, y1, y2)`
+### `gridIndex.query(key, x1, y1, y1, y2)`
 
 Find the keys that intersect with the given box.
 
 - **x1**: The x coordinate of the left edge of the box.
+- **y1**: The y coordinate of the bottom edge of the box.
 - **x2**: The x coordinate of the right edge of the box.
-- **y1**: The y coordinate of the top edge of the box.
-- **y2**: The y coordinate of the bottom edge of the box.
+- **y2**: The y coordinate of the top edge of the box.
 
 **returns** an array of keys.
 
