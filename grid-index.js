@@ -67,10 +67,10 @@ GridIndex.prototype._insertCell = function(x1, y1, x2, y2, cellIndex, uid) {
     this.cells[cellIndex].push(uid);
 };
 
-GridIndex.prototype.query = function(x1, y1, x2, y2) {
+GridIndex.prototype.query = function(x1, y1, x2, y2, intersectionTest) {
     var min = this.min;
     var max = this.max;
-    if (x1 <= min && y1 <= min && max <= x2 && max <= y2) {
+    if (x1 <= min && y1 <= min && max <= x2 && max <= y2 && !intersectionTest) {
         // We use `Array#slice` because `this.keys` may be a `Int32Array` and
         // some browsers (Safari and IE) do not support `TypedArray#slice`
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice#Browser_compatibility
@@ -79,12 +79,12 @@ GridIndex.prototype.query = function(x1, y1, x2, y2) {
     } else {
         var result = [];
         var seenUids = {};
-        this._forEachCell(x1, y1, x2, y2, this._queryCell, result, seenUids);
+        this._forEachCell(x1, y1, x2, y2, this._queryCell, result, seenUids, intersectionTest);
         return result;
     }
 };
 
-GridIndex.prototype._queryCell = function(x1, y1, x2, y2, cellIndex, result, seenUids) {
+GridIndex.prototype._queryCell = function(x1, y1, x2, y2, cellIndex, result, seenUids, intersectionTest) {
     var cell = this.cells[cellIndex];
     if (cell !== null) {
         var keys = this.keys;
@@ -93,10 +93,12 @@ GridIndex.prototype._queryCell = function(x1, y1, x2, y2, cellIndex, result, see
             var uid = cell[u];
             if (seenUids[uid] === undefined) {
                 var offset = uid * 4;
-                if ((x1 <= bboxes[offset + 2]) &&
+                if (intersectionTest ?
+                    intersectionTest(bboxes[offset + 0], bboxes[offset + 1], bboxes[offset + 2], bboxes[offset + 3]) :
+                    ((x1 <= bboxes[offset + 2]) &&
                     (y1 <= bboxes[offset + 3]) &&
                     (x2 >= bboxes[offset + 0]) &&
-                    (y2 >= bboxes[offset + 1])) {
+                    (y2 >= bboxes[offset + 1]))) {
                     seenUids[uid] = true;
                     result.push(keys[uid]);
                 } else {
@@ -107,7 +109,7 @@ GridIndex.prototype._queryCell = function(x1, y1, x2, y2, cellIndex, result, see
     }
 };
 
-GridIndex.prototype._forEachCell = function(x1, y1, x2, y2, fn, arg1, arg2) {
+GridIndex.prototype._forEachCell = function(x1, y1, x2, y2, fn, arg1, arg2, intersectionTest) {
     var cx1 = this._convertToCellCoord(x1);
     var cy1 = this._convertToCellCoord(y1);
     var cx2 = this._convertToCellCoord(x2);
@@ -115,9 +117,18 @@ GridIndex.prototype._forEachCell = function(x1, y1, x2, y2, fn, arg1, arg2) {
     for (var x = cx1; x <= cx2; x++) {
         for (var y = cy1; y <= cy2; y++) {
             var cellIndex = this.d * y + x;
-            if (fn.call(this, x1, y1, x2, y2, cellIndex, arg1, arg2)) return;
+            if (intersectionTest && !intersectionTest(
+                        this._convertFromCellCoord(x),
+                        this._convertFromCellCoord(y),
+                        this._convertFromCellCoord(x + 1),
+                        this._convertFromCellCoord(y + 1))) continue;
+            if (fn.call(this, x1, y1, x2, y2, cellIndex, arg1, arg2, intersectionTest)) return;
         }
     }
+};
+
+GridIndex.prototype._convertFromCellCoord = function(x) {
+    return (x - this.padding) / this.scale;
 };
 
 GridIndex.prototype._convertToCellCoord = function(x) {
