@@ -65,7 +65,7 @@ Insert a new key, box pair into the grid.
 - **y2**: The y coordinate of the top edge of the box.
 
 
-### `gridIndex.query(key, x1, y1, y1, y2)`
+### `gridIndex.query(key, x1, y1, x2, y2, intersectionTest?)`
 
 Find the keys that intersect with the given box.
 
@@ -73,6 +73,7 @@ Find the keys that intersect with the given box.
 - **y1**: The y coordinate of the bottom edge of the box.
 - **x2**: The x coordinate of the right edge of the box.
 - **y2**: The y coordinate of the top edge of the box.
+- **intersectionTest**: An optional function that can be used to filter results by bbox. If provided, this function is called for each possible result with four arguments: x1, y1, x2, y2. Return true to include the result in the returned value.
 
 **returns** an array of keys.
 
