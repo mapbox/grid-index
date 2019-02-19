@@ -65,7 +65,7 @@ Insert a new key, box pair into the grid.
 - **y2**: The y coordinate of the top edge of the box.
 
 
-### `gridIndex.query(key, x1, y1, x2, y2, intersectionTest?)`
+### `gridIndex.query(x1, y1, x2, y2, intersectionTest?)`
 
 Find the keys that intersect with the given box.
 
